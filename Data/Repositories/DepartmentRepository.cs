@@ -9,6 +9,8 @@ public interface IDepartmentRepository
     Task<IEnumerable<Department?>> GetAllDepartmentsAsync();
     Task<Department?> GetSingleDepartmentAsync(int id);
     Task InsertIntoDepartmentAsync(DepartmentDto department);
+    Task UpdateDepartmentAsync(int id, DepartmentDto department);
+    Task DeleteDepartmentAsync(int id);
 }
 
 public class DepartmentRepository : IDepartmentRepository
@@ -32,9 +34,9 @@ public class DepartmentRepository : IDepartmentRepository
     {
         using var connection = _connectionFactory.CreateConnection();
         const string query = "SELECT * FROM Department WHERE Id = @id";
+        var parameters = new { id };
 
-
-        return await connection.QuerySingleAsync<Department>(query, new { id });
+        return await connection.QuerySingleAsync<Department>(query, parameters);
     }
 
     public async Task InsertIntoDepartmentAsync(DepartmentDto department)
@@ -43,5 +45,23 @@ public class DepartmentRepository : IDepartmentRepository
         const string query = "INSERT INTO Department (Name) VALUES (@Name)";
 
         await connection.ExecuteAsync(query, department);
+    }
+
+    public async Task UpdateDepartmentAsync(int id, DepartmentDto department)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+        const string query = "UPDATE Department SET NAME = @Name WHERE Id = @Id";
+        var parameters = new { department.Name, Id = id };
+
+        await connection.ExecuteAsync(query, parameters);
+    }
+
+    public async Task DeleteDepartmentAsync(int id)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+        const string query = "DELETE FROM Department WHERE Id = @Id";
+        var parameters = new { Id = id };
+
+        await connection.ExecuteAsync(query, parameters);
     }
 }
